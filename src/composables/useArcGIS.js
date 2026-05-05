@@ -67,7 +67,6 @@ export function useArcGIS() {
       "esri/layers/SceneLayer",
       "esri/layers/FeatureLayer",
       "esri/layers/ElevationLayer",
-      "esri/widgets/LayerList",
       "esri/core/reactiveUtils",
     ], function (
       esriConfig,
@@ -76,7 +75,6 @@ export function useArcGIS() {
       SceneLayer,
       FeatureLayer,
       ElevationLayer,
-      LayerList,
       reactiveUtils
     ) {
       // CORS & proxy config
@@ -128,21 +126,6 @@ export function useArcGIS() {
         ground: "world-elevation", // ← DTM global Esri (SRTM + lokal)
       });
 
-      // Feature Layers (opsional)
-      CONFIG.featureLayers?.forEach((cfg) => {
-        const fl = new FeatureLayer({
-          url: cfg.url,
-          title: cfg.title,
-          outFields: ["*"],
-          opacity: 0.6,
-          elevationInfo: { mode: "on-the-ground" },
-          renderer: cfg.renderer,
-        });
-        fl._originalUrl = cfg.originalUrl;
-        fl._popupFields = cfg.popupFields;
-        map.add(fl);
-      });
-
       // Scene Layers (bangunan 3D)
       CONFIG.sceneLayers.forEach((cfg) => {
         const sl = new SceneLayer({
@@ -160,6 +143,20 @@ export function useArcGIS() {
         sl._popupFields = cfg.popupFields;
         map.add(sl);
         watchLayerLoad(sl);
+      });
+
+      // feature layer
+      CONFIG.featureLayers?.forEach((cfg) => {
+        const fl = new FeatureLayer({
+          url: cfg.url,
+          title: cfg.title,
+          outFields: ["*"],
+          opacity: 0.6,
+          elevationInfo: { mode: "on-the-ground" },
+          renderer: cfg.renderer,
+        });
+        fl._popupFields = cfg.popupFields;
+        map.add(fl, 0);
       });
 
       view = new SceneView({
@@ -187,7 +184,6 @@ export function useArcGIS() {
 
       // LayerList widget
       view.when(() => {
-        new LayerList({ view, container: "layerlist-container" });
         setProgress(70);
         setStatus("loading", "Merender objek 3D...");
         loadingText.value = "Merender objek 3D...";
@@ -240,6 +236,18 @@ export function useArcGIS() {
           // Highlight bangunan yang diklik — warna biru accent
           highlightHandle = layerView.highlight(graphic);
           showPopup3D(graphic.layer, graphic.attributes);
+          try {
+            await view.goTo(
+              {
+                target: graphic, // target langsung ke geometry bangunan
+                zoom: 20, // zoom cukup dekat
+              },
+              {
+                duration: 1000,
+                easing: "ease-in-out",
+              }
+            );
+          } catch (e) {}
           return;
         }
 
@@ -318,8 +326,7 @@ export function useArcGIS() {
 
   function showPopupFeature(layer, attrs) {
     popupLayerName.value = layer.title;
-    popupTitle.value =
-      attrs["SUB_ZONA"] || attrs["NAMA"] || attrs["name"] || "Informasi Layer";
+    popupTitle.value = attrs["NAMOBJ"] || attrs["name"] || "Informasi Layer";
     const fields = layer._popupFields || [];
     popupRows.value = fields
       .filter((f) => attrs[f.key] != null && attrs[f.key] !== "")

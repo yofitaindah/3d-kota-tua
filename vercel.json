@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+      {
+        "source": "/portal-intercept/sharing/rest/portals/self",
+        "destination": "/api/portal-stub"
+      },
+      {
+        "source": "/arcgis-proxy/:path*",
+        "destination": "/api/arcgis-proxy/:path*"
+      }
+    ]
+  }

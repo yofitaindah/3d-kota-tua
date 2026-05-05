@@ -114,9 +114,6 @@
         <!-- LAYERS TAB -->
         <div v-show="activeTab === 'layers'" class="p-3 space-y-3">
           <div>
-            <p class="text-[9px] font-semibold uppercase tracking-widest text-white/25 mb-2 px-1">Layer Aktif</p>
-            <div id="layerlist-container" class="rounded-md overflow-hidden border border-white/[0.06]"></div>
-
             <!-- Layer toggles -->
             <div class="mt-2 space-y-0.5">
               <div
@@ -177,7 +174,7 @@
           <div>
             <p class="text-[9px] font-semibold uppercase tracking-widest text-white/25 mb-2 px-1">Kategori Bangunan</p>
             <div class="space-y-1">
-              <div v-for="cat in BUILDING_CATEGORIES" :key="cat.label" class="flex items-center gap-2.5 py-1 px-1">
+              <div v-for="cat in RDTR_LEGEND" :key="cat.label" class="flex items-center gap-2.5 py-1 px-1">
                 <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="{ background: cat.color }"></span>
                 <span class="text-[11px] text-white/55">{{ cat.label }}</span>
               </div>
@@ -229,7 +226,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { ICONS } from '../config/icons.js'
-import { BASEMAPS, TABS, BUILDING_CATEGORIES } from '../config/index.js'
+import { BASEMAPS, TABS, RDTR_LEGEND} from '../config/index.js'
 
 const props = defineProps({
   open: Boolean,
