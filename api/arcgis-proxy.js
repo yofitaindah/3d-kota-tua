@@ -1,7 +1,10 @@
 export default async function handler(req, res) {
   const target = "https://tataruang.jakarta.go.id";
-  const path = req.url.replace("/api/arcgis-proxy", "");
-  const url = `${target}${path}`;
+  const token = process.env.ARCGIS_TOKEN || "";
+
+  // Inject token ke URL
+  const separator = req.url.includes("?") ? "&" : "?";
+  const urlWithToken = `${target}${req.url}${separator}token=${token}`;
 
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -10,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(urlWithToken, {
       method: req.method,
       headers: {
         Origin: target,
